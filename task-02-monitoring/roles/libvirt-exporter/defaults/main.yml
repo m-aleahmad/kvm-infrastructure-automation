@@ -1,0 +1,4 @@
+---
+libvirt_exporter_version: "2.6.0"
+libvirt_exporter_arch: "amd64"
+libvirt_exporter_port: 9177

@@ -1,0 +1,82 @@
+groups:
+  - name: kvm-host-alerts
+    rules:
+      - alert: HostHighLoad
+        expr: node_load1 / count(count by (cpu) (node_cpu_seconds_total{mode="idle"})) > 2
+        for: 15m
+        labels:
+          severity: warning
+          response: business-hours
+        annotations:
+          summary: "High host CPU load"
+          description: "Host load has exceeded twice the CPU count for 15 minutes."
+
+      - alert: HostMemoryCritical
+        expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.97
+        for: 5m
+        labels:
+          severity: critical
+          response: immediate
+        annotations:
+          summary: "Critical host memory usage"
+          description: "Available memory is below 3 percent for 5 minutes."
+
+      - alert: HostMemoryHigh
+        expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.90
+        for: 10m
+        labels:
+          severity: warning
+          response: business-hours
+        annotations:
+          summary: "High host memory usage"
+          description: "Memory usage exceeds 90 percent for 10 minutes."
+
+      - alert: HostDiskReadLatencyHigh
+        expr: rate(node_disk_read_time_seconds_total[5m]) / clamp_min(rate(node_disk_reads_completed_total[5m]), 1e-9) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          response: business-hours
+        annotations:
+          summary: "High disk read latency"
+          description: "Average disk read latency exceeds 50 milliseconds."
+
+      - alert: HostDiskWriteLatencyHigh
+        expr: rate(node_disk_write_time_seconds_total[5m]) / clamp_min(rate(node_disk_writes_completed_total[5m]), 1e-9) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          response: business-hours
+        annotations:
+          summary: "High disk write latency"
+          description: "Average disk write latency exceeds 50 milliseconds."
+
+      - alert: HostNetworkDrops
+        expr: rate(node_network_receive_drop_total{device!="lo"}[5m]) + rate(node_network_transmit_drop_total{device!="lo"}[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          response: business-hours
+        annotations:
+          summary: "Network packet drops detected"
+          description: "Network interface drop rate exceeds one packet per second."
+
+      - alert: LibvirtExporterDown
+        expr: libvirt_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          response: immediate
+        annotations:
+          summary: "Libvirt metrics collection failed"
+          description: "The Libvirt exporter cannot successfully collect metrics."
+
+      - alert: NodeExporterDown
+        expr: up{job="node-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          response: immediate
+        annotations:
+          summary: "Node Exporter is unavailable"
+          description: "Prometheus cannot scrape Node Exporter."

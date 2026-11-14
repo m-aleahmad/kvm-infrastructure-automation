@@ -1,0 +1,7 @@
+---
+monitoring_allowed_source: "192.168.188.131"
+monitoring_exporter_ports:
+  - 9100
+  - 9177
+monitoring_firewall_table: kvm_host_filter
+monitoring_firewall_chain: monitoring_exporters

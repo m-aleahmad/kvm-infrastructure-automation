@@ -1,0 +1,12 @@
+[Unit]
+Description=KVM Monitoring Firewall Rules
+After=nftables.service
+Requires=nftables.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kvm-monitoring-firewall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

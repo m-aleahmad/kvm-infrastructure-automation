@@ -1,0 +1,35 @@
+---
+- name: Download Libvirt Exporter package
+  ansible.builtin.get_url:
+    url: "https://github.com/inovex/prometheus-libvirt-exporter/releases/download/v{{ libvirt_exporter_version }}/prometheus-libvirt-exporter-{{ libvirt_exporter_version }}.{{ libvirt_exporter_arch }}.deb"
+    dest: "/tmp/prometheus-libvirt-exporter-{{ libvirt_exporter_version }}.{{ libvirt_exporter_arch }}.deb"
+    mode: "0644"
+
+- name: Download release checksums
+  ansible.builtin.get_url:
+    url: "https://github.com/inovex/prometheus-libvirt-exporter/releases/download/v{{ libvirt_exporter_version }}/prometheus-libvirt-exporter-{{ libvirt_exporter_version }}_checksums.txt"
+    dest: "/tmp/prometheus-libvirt-exporter-checksums.txt"
+    mode: "0644"
+
+- name: Verify package checksum
+  ansible.builtin.command:
+    argv:
+      - sha256sum
+      - --check
+      - --ignore-missing
+      - prometheus-libvirt-exporter-checksums.txt
+    chdir: /tmp
+  register: exporter_checksum
+  changed_when: false
+
+- name: Install Libvirt Exporter
+  ansible.builtin.apt:
+    deb: "/tmp/prometheus-libvirt-exporter-{{ libvirt_exporter_version }}.{{ libvirt_exporter_arch }}.deb"
+    state: present
+
+- name: Enable and start Libvirt Exporter
+  ansible.builtin.systemd:
+    name: prometheus-libvirt-exporter
+    enabled: true
+    state: started
+    daemon_reload: true

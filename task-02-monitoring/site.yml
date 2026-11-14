@@ -1,0 +1,13 @@
+---
+- name: Deploy monitoring exporters and firewall rules
+  hosts: kvm_hosts
+  become: true
+  become_method: sudo
+  vars:
+    ansible_become_password: "{{ kvm_user1_password }}"
+  gather_facts: true
+
+  roles:
+    - node-exporter
+    - libvirt-exporter
+    - monitoring-firewall

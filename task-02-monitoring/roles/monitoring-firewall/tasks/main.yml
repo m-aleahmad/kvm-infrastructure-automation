@@ -1,0 +1,25 @@
+---
+- name: Install monitoring firewall script
+  ansible.builtin.template:
+    src: apply-firewall.sh.j2
+    dest: /usr/local/sbin/kvm-monitoring-firewall
+    owner: root
+    group: root
+    mode: "0750"
+  notify: Restart monitoring firewall
+
+- name: Install monitoring firewall systemd service
+  ansible.builtin.template:
+    src: monitoring-firewall.service.j2
+    dest: /etc/systemd/system/monitoring-firewall.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart monitoring firewall
+
+- name: Enable and start monitoring firewall
+  ansible.builtin.systemd:
+    name: monitoring-firewall
+    enabled: true
+    state: started
+    daemon_reload: true

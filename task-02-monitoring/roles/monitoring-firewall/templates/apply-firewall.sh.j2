@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+TABLE="{{ monitoring_firewall_table }}"
+INPUT="input"
+CHAIN="{{ monitoring_firewall_chain }}"
+
+nft list chain inet "$TABLE" "$INPUT" >/dev/null
+
+# Remove legacy exporter rules from the input chain.
+nft -a list chain inet "$TABLE" "$INPUT" |
+awk '/ip saddr .* tcp dport (9100|9177) accept/ {
+    for (i=1; i<=NF; i++)
+        if ($i == "handle") print $(i+1)
+}' |
+while read -r handle; do
+    nft delete rule inet "$TABLE" "$INPUT" handle "$handle"
+done
+
+# Create or refresh the dedicated monitoring chain.
+if ! nft list chain inet "$TABLE" "$CHAIN" >/dev/null 2>&1; then
+    nft add chain inet "$TABLE" "$CHAIN"
+fi
+
+nft flush chain inet "$TABLE" "$CHAIN"
+
+{% for port in monitoring_exporter_ports %}
+nft add rule inet "$TABLE" "$CHAIN" ip saddr {{ monitoring_allowed_source }} tcp dport {{ port }} accept
+{% endfor %}
+
+# Add the jump only once.
+if ! nft list chain inet "$TABLE" "$INPUT" | grep -Fq "jump $CHAIN"; then
+    nft add rule inet "$TABLE" "$INPUT" jump "$CHAIN"
+fi

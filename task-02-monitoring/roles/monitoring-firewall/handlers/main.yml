@@ -1,0 +1,6 @@
+---
+- name: Restart monitoring firewall
+  ansible.builtin.systemd:
+    name: monitoring-firewall
+    state: restarted
+    daemon_reload: true
