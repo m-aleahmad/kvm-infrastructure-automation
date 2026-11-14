@@ -1,0 +1,30 @@
+---
+- name: Run preflight checks
+  ansible.builtin.import_tasks: preflight.yml
+
+- name: Install required packages
+  ansible.builtin.import_tasks: packages.yml
+
+- name: Configure administrative users
+  ansible.builtin.import_tasks: users.yml
+
+- name: Configure SSH security
+  ansible.builtin.import_tasks: ssh.yml
+
+- name: Configure time synchronization
+  ansible.builtin.import_tasks: time.yml
+
+- name: Configure kernel parameters
+  ansible.builtin.import_tasks: kernel.yml
+
+- name: Configure firewall
+  ansible.builtin.import_tasks: firewall.yml
+
+- name: Configure system logging
+  ansible.builtin.import_tasks: logging.yml
+
+- name: Configure KVM and libvirt
+  ansible.builtin.import_tasks: libvirt.yml
+
+- name: Validate KVM host
+  ansible.builtin.import_tasks: validation.yml

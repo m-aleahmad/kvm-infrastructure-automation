@@ -1,0 +1,40 @@
+
+---
+- name: Bootstrap initial Debian host
+  hosts: kvm_hosts
+  become: true
+  become_method: su
+  become_user: root
+  become_flags: "-s /bin/sh"
+  vars:
+    ansible_become_password: "{{ kvm_root_become_password }}"
+  gather_facts: false
+
+  tasks:
+    - name: Install sudo
+      ansible.builtin.apt:
+        name: sudo
+        state: present
+        update_cache: true
+
+    - name: Add initial user to sudo group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: sudo
+        append: true
+        state: present
+    
+    - name: Reset SSH connection to refresh group membership
+      ansible.builtin.meta: reset_connection
+
+- name: Provision KVM host
+  hosts: kvm_hosts
+  become: true
+  become_method: sudo
+  become_user: root
+  vars:
+    ansible_become_password: "{{ kvm_user1_password }}"
+  gather_facts: true
+
+  roles:
+    - kvm-host

@@ -1,0 +1,13 @@
+# Ansible temporary files
+*.retry
+*.tmp
+
+# Ansible Vault credentials
+inventory/group_vars/kvm_hosts/vault.yml
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE settings
+.vscode/

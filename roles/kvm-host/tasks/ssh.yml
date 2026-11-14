@@ -1,0 +1,30 @@
+---
+- name: Ensure SSH directory exists for administrative user
+  ansible.builtin.file:
+    path: "/home/{{ kvm_admin_user }}/.ssh"
+    state: directory
+    owner: "{{ kvm_admin_user }}"
+    group: "{{ kvm_admin_user }}"
+    mode: "0700"
+
+- name: Install administrative user's SSH public key
+  ansible.builtin.lineinfile:
+    path: "/home/{{ kvm_admin_user }}/.ssh/authorized_keys"
+    line: "{{ kvm_admin_ssh_public_key }}"
+    state: present
+    create: true
+    owner: "{{ kvm_admin_user }}"
+    group: "{{ kvm_admin_user }}"
+    mode: "0600"
+    regexp: "^{{ kvm_admin_ssh_public_key | regex_escape }}$"
+  when: kvm_admin_ssh_public_key | length > 0
+
+- name: Deploy SSH server configuration
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config.d/00-kvm-host.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: "/usr/sbin/sshd -t -f %s"
+  notify: Reload SSH service

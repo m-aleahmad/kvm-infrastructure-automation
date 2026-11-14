@@ -1,0 +1,42 @@
+---
+- name: Check KVM device availability
+  ansible.builtin.stat:
+    path: /dev/kvm
+  register: kvm_device
+
+- name: Verify KVM device is available
+  ansible.builtin.assert:
+    that:
+      - kvm_device.stat.exists
+      - kvm_device.stat.ischr
+    fail_msg: >-
+      /dev/kvm is unavailable. Verify hardware virtualization support,
+      nested virtualization settings, and KVM kernel modules.
+    success_msg: "KVM device is available."
+
+- name: Check libvirt default network
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - net-info
+      - default
+  register: libvirt_network_status
+  changed_when: false
+
+- name: Verify libvirt default network is active
+  ansible.builtin.assert:
+    that:
+      - libvirt_network_status.stdout is search('Active:\\s+yes')
+      - libvirt_network_status.stdout is search('Autostart:\\s+yes')
+    fail_msg: "Libvirt default NAT network is not active or not configured for autostart."
+    success_msg: "Libvirt default NAT network is active and persistent."
+
+- name: Verify system libvirt connection
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - -c
+      - "{{ kvm_libvirt_uri }}"
+      - list
+      - --all
+  changed_when: false

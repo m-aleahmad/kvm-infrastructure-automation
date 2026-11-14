@@ -1,0 +1,21 @@
+---
+- name: Configure system timezone
+  ansible.builtin.file:
+    src: "/usr/share/zoneinfo/{{ kvm_timezone }}"
+    dest: /etc/localtime
+    state: link
+    force: true
+
+- name: Configure timezone name
+  ansible.builtin.copy:
+    content: "{{ kvm_timezone }}\n"
+    dest: /etc/timezone
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure Chrony is enabled and running
+  ansible.builtin.service:
+    name: "{{ kvm_ntp_service }}"
+    state: started
+    enabled: true

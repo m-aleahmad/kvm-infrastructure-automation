@@ -1,0 +1,76 @@
+---
+# General settings
+kvm_hostname: "kvm01"
+kvm_timezone: "Europe/Berlin"
+
+# Initial Ansible connection user
+kvm_ansible_user: "user1"
+
+# Administrative user managed by this role
+kvm_admin_user: "kvmadmin"
+kvm_admin_groups:
+  - sudo
+  - kvm
+  - libvirt
+
+# SSH settings
+kvm_ssh_port: 22
+kvm_ssh_permit_root_login: "no"
+kvm_ssh_password_authentication: "yes"
+kvm_ssh_pubkey_authentication: "yes"
+
+# Time synchronization
+kvm_ntp_service: "chrony"
+
+# Package management
+kvm_base_packages:
+  - sudo
+  - openssh-server
+  - ca-certificates
+  - curl
+  - vim-tiny
+  - less
+  - chrony
+  - nftables
+  - rsyslog
+  - logrotate
+  - apparmor
+  - apparmor-utils
+  - acl
+  - python3
+  - python3-apt
+
+# KVM and libvirt packages
+kvm_virtualization_packages:
+  - qemu-system-x86
+  - qemu-utils
+  - libvirt-daemon-system
+  - libvirt-clients
+  - virtinst
+  - ovmf
+  - libvirt-daemon-config-network
+
+# Libvirt settings
+kvm_libvirt_service: "libvirtd"
+kvm_libvirt_uri: "qemu:///system"
+
+# Firewall settings
+kvm_ssh_allowed_networks:
+  - "192.168.188.0/24"
+
+# Logging settings
+kvm_journald_storage: "persistent"
+kvm_journald_compress: true
+kvm_journald_system_max_use: "500M"
+
+# Kernel settings
+kvm_sysctl_settings:
+  net.ipv4.ip_forward: 1
+  net.ipv6.conf.all.forwarding: 1
+  vm.swappiness: 10
+
+# Validation settings
+kvm_require_hardware_virtualization: true
+
+# SSH public key for administrative user
+kvm_admin_ssh_public_key: ""

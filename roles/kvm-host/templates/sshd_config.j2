@@ -1,0 +1,7 @@
+# Managed by Ansible
+# KVM host SSH security configuration
+
+Port {{ kvm_ssh_port }}
+PermitRootLogin {{ kvm_ssh_permit_root_login }}
+PubkeyAuthentication {{ kvm_ssh_pubkey_authentication }}
+PasswordAuthentication {{ kvm_ssh_password_authentication }}

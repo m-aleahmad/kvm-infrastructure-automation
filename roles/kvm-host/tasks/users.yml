@@ -1,0 +1,9 @@
+---
+- name: Ensure administrative user exists
+  ansible.builtin.user:
+    name: "{{ kvm_admin_user }}"
+    groups: "{{ kvm_admin_groups | join(',') }}"
+    append: true
+    create_home: true
+    shell: /bin/bash
+    state: present

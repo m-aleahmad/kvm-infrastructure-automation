@@ -1,0 +1,33 @@
+#!/usr/sbin/nft -f
+
+# Managed by Ansible
+# Preserve libvirt-managed firewall tables.
+
+table inet kvm_host_filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        # Loopback
+        iifname "lo" accept
+
+        # Established and related connections
+        ct state established,related accept
+        ct state invalid drop
+
+        # ICMP and ICMPv6
+        ip protocol icmp accept
+        meta l4proto ipv6-icmp accept
+
+        # DHCP client replies
+        udp sport 67 udp dport 68 accept
+
+        # Default libvirt NAT network: DNS and DHCP
+        iifname "virbr0" udp dport { 53, 67 } accept
+        iifname "virbr0" tcp dport 53 accept
+
+        # SSH from management network
+{% for network in kvm_ssh_allowed_networks %}
+        ip saddr {{ network }} tcp dport {{ kvm_ssh_port }} accept
+{% endfor %}
+    }
+}

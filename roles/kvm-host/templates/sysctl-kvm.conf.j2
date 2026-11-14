@@ -1,0 +1,6 @@
+# Managed by Ansible
+# KVM host kernel parameters
+
+{% for key, value in kvm_sysctl_settings.items() %}
+{{ key }} = {{ value }}
+{% endfor %}

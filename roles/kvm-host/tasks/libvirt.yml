@@ -1,0 +1,49 @@
+---
+- name: Ensure libvirt service is enabled and running
+  ansible.builtin.service:
+    name: "{{ kvm_libvirt_service }}"
+    state: started
+    enabled: true
+
+- name: Check existing libvirt networks
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - net-list
+      - --all
+      - --name
+  register: libvirt_networks
+  changed_when: false
+
+- name: Define default libvirt network
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - net-define
+      - /usr/share/libvirt/networks/default.xml
+  when: "'default' not in libvirt_networks.stdout_lines"
+
+- name: Check default libvirt network status
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - net-info
+      - default
+  register: libvirt_default_network
+  changed_when: false
+
+- name: Start default libvirt network
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - net-start
+      - default
+  when: libvirt_default_network.stdout is not search('Active:\\s+yes')
+
+- name: Enable default libvirt network autostart
+  ansible.builtin.command:
+    argv:
+      - virsh
+      - net-autostart
+      - default
+  when: libvirt_default_network.stdout is not search('Autostart:\\s+yes')

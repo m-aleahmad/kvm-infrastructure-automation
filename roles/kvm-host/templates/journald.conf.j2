@@ -1,0 +1,7 @@
+# Managed by Ansible
+# KVM host journald configuration
+
+[Journal]
+Storage={{ kvm_journald_storage }}
+Compress={{ 'yes' if kvm_journald_compress | bool else 'no' }}
+SystemMaxUse={{ kvm_journald_system_max_use }}

@@ -1,0 +1,39 @@
+---
+- name: Verify supported operating system
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == "Debian"
+      - ansible_facts['distribution_major_version'] == "12"
+    fail_msg: "This role supports Debian 12 only."
+    success_msg: "Operating system check passed."
+
+- name: Verify supported CPU architecture
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['architecture'] == "x86_64"
+    fail_msg: "KVM host must use x86_64 architecture."
+    success_msg: "CPU architecture check passed."
+
+- name: Check hardware virtualization CPU flags
+  ansible.builtin.command:
+    argv:
+      - grep
+      - -E
+      - -m1
+      - -o
+      - vmx|svm
+      - /proc/cpuinfo
+  register: kvm_cpu_virtualization
+  changed_when: false
+  failed_when: false
+
+- name: Verify hardware virtualization support
+  ansible.builtin.assert:
+    that:
+      - kvm_cpu_virtualization.rc == 0
+    fail_msg: >-
+      Hardware virtualization (Intel VT-x or AMD-V) is not available.
+      Enable virtualization in BIOS/UEFI or nested virtualization
+      in the hypervisor.
+    success_msg: "Hardware virtualization support detected."
+  when: kvm_require_hardware_virtualization | bool

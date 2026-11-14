@@ -1,0 +1,9 @@
+---
+- name: Deploy KVM kernel parameters
+  ansible.builtin.template:
+    src: sysctl-kvm.conf.j2
+    dest: /etc/sysctl.d/99-kvm-host.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Apply kernel parameters

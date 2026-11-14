@@ -1,0 +1,28 @@
+---
+- name: Deploy nftables firewall configuration
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: "/usr/sbin/nft -c -f %s"
+  register: nftables_config
+
+- name: Remove previous KVM firewall table before reload
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/nft
+      - delete
+      - table
+      - inet
+      - kvm_host_filter
+  failed_when: false
+  changed_when: false
+  when: nftables_config.changed
+
+- name: Ensure nftables service is enabled and running
+  ansible.builtin.service:
+    name: nftables
+    state: "{{ 'reloaded' if nftables_config.changed else 'started' }}"
+    enabled: true
